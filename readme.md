@@ -28,7 +28,8 @@ You can  use the following command to start the app:
 Once the server is up and running, you can access by going to `http://127.0.0.1:7860/` in your web browser.
 
 This is the running applications interface 
-![running application interface]("data/start.png")
+<img width="1440" alt="start" src="https://github.com/data354/Biomass/assets/103064728/291491a8-ee10-42f7-8549-585c78884695">
+
 ![interface after AGBD estimation]("data/estimation.png")
 
 That's it! You should now be able to use Biomass application. If you have any questions or problems, please don't hesitate to contact us at "issouf.toure@data354.co"
