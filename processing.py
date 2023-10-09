@@ -6,6 +6,7 @@ import pandas as pd
 from glob import glob
 import os
 import utm
+import rasterio
 from tqdm import tqdm
 #from xml.etree import ElementTree as et
 import xmltodict
@@ -105,3 +106,46 @@ def extract_sub_image(bandes_path,tile_path,area,resolution=10, d= 3, cld_path =
       return images
   else:
       return images.mean((1,2))
+  
+
+def ndvi(area, tile_name):
+    """
+    polygone: (lon,lat) format
+    tile_name: name of tile with the most low cloud coverage
+    """
+    #Extract tile  coordonnates (lat,long)
+    tile_path = tile_name+"/INSPIRE.xml"
+    xml_file=open(tile_path,"r")
+    xml_string=xml_file.read()
+    python_dict=xmltodict.parse(xml_string)
+    tile_coordonnates = python_dict["gmd:MD_Metadata"]["gmd:identificationInfo"]["gmd:MD_DataIdentification"]["gmd:abstract"]["gco:CharacterString"].split()
+
+    # S2 tile coordonnates
+    lat,lon = float(tile_coordonnates[0]),float(tile_coordonnates[1])
+    tile_coordonnate = [lat,lon]
+
+    refx, refy, _, _ = utm.from_latlon(tile_coordonnate[0], tile_coordonnate[1])
+    ax,ay,_,_ = utm.from_latlon(area[1],area[0]) # lat,lon
+    
+    ref = [refx, refy]
+    utm_cord = [ax,ay]
+    x,y = coords_to_pixels(ref,utm_cord)
+
+    # read images
+    path_4 = tile_name+"/GRANULE/*/IMG_DATA/R10m/*_B04_10m.jp2"
+    path_8 = tile_name+"/GRANULE/*/IMG_DATA/R10m/*_B08_10m.jp2"
+    red_object = rasterio.open(glob(path_4)[0])
+    nir_object = rasterio.open(glob(path_8)[0])
+    red = red_object.read()
+    nir = nir_object.read()
+    red,nir = red[0],nir[0]
+    # extract area and remove unsigne
+    sub_red = red[y-3:y+3,x-3:x+3].astype(np.float16)
+    sub_nir = nir[y-3:y+3,x-3:x+3].astype(np.float16)
+    
+    # NDVI
+    ndvi_image = ((sub_nir - sub_red)/(sub_nir+sub_red))
+    ndvi_mean_value = ndvi_image.mean()
+    
+    return ndvi_mean_value
+      

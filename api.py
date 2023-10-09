@@ -32,7 +32,7 @@ def download(cordinate):
     area_of_study = [[A,B,C,D,A]]
     GEOMAP["features"][0]["geometry"]["coordinates"] = area_of_study
 
-    N_DAYS_AGO = 7
+    N_DAYS_AGO = 30
     today = datetime.now()
     current_year_today,current_month_today,current_day_today = today.year, today.month, today.day
     n_days_ago = today - timedelta(days=N_DAYS_AGO)
@@ -88,6 +88,7 @@ def select_best_cloud_coverage_tile():
     delta = (today - acquisition_date)
     days_ago = delta.days
     return name,min(cld_prob),days_ago
+
 
 ##
 def delete_tiles():

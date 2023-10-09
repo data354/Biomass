@@ -6,7 +6,7 @@ from indices import indices
 import xgboost as xgb
 import pickle
 
-def predict(lon, lat):
+def predict(lat, lon):
     cord = [lon,lat]
     download(cord)
     unzip()
@@ -36,20 +36,36 @@ def predict(lon, lat):
     biomass = loaded_model.predict(X)[0]
     carbon = 0.55*biomass
 
+    # NDVI
+    ndvi_index = ndvi(cord,name)
+
     # deleted download files
     delete_tiles()
 
-    return str(cld_prob)+ " % cloud coverage", str(days_ago)+" days ago",str(biomass)+" Mg/ha", str(carbon)+" MgC/ha"
+    return str(cld_prob)+ " % cloud coverage", str(days_ago)+" days ago",str(biomass)+" Mg/ha", str(carbon)+" MgC/ha","NDVI: "+ str(ndvi_index)
 
 # Create title, description and article strings
-title = "🌴Above ground Biomass estimation🌴"
+title = "🌴BEEPAS : Biomass estimation to Evaluate the Environmental Performance of Agroforestry System🌴"
 description = "This application estimates the biomass of certain areas using AI and satellite images (S2)."
 article = "Created by data354."
+
+# Create examples list from "examples/" directory
+#example_list = [["examples/" + example] for example in os.listdir("examples")]
+example_list = [[5.379913, -4.050445],[6.54644,-7.86156],[5.346938, -4.027849]]
+
+outputs = [
+    gr.Textbox(label="Cloud coverage"),
+    gr.Textbox(label="Number of days since sensing"),
+    gr.Textbox(label="Above ground biomass density(AGBD) Mg/ha"),
+    gr.Textbox(label="Carbon stock density MgC/ha "),
+    gr.Textbox(label="Mean NDVI"),]
+
 
 demo = gr.Interface(
     fn=predict,
     inputs=["number", "number"],
-    outputs=[ "text", "text","text","text"],
+    outputs=outputs, #[ "text", "text","text","text","text"],
+    examples=example_list,
     title=title,
     description=description,
     article=article,
